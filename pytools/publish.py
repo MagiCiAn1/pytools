@@ -10,6 +10,7 @@ from ZipFileHelper import ZipFileHelper
 DEBUG = True
 
 
+# noinspection PyInterpreter
 class PublishHelper:
     def __init__(self, **karg):
         """
@@ -26,13 +27,13 @@ class PublishHelper:
         if 'include' in karg.keys():
             include_list = karg.get('include')
             if isinstance(include_list, list):
-                self._include = include_list
+                self._include = self.__specification_path(include_list)
             else:
                 logging.error('[PublishHelper.init] 初始化失败，include 参数类型不正确')
         if 'exclude' in karg.keys():
             exclude_list = karg.get('exclude')
             if isinstance(exclude_list, list):
-                self._exclude = exclude_list
+                self._exclude = self.__specification_path(exclude_list)
             else:
                 logging.error('[PublishHelper.init] 初始化失败，exclude 参数类型不正确')
 
@@ -43,6 +44,7 @@ class PublishHelper:
         :return:成功返回True，否则返回False
         """
         if not isinstance(dir_path, str):
+            dir_path = self.__specification_path(dir_path)
             logging.error('[PublishHelper.pack_file] 打包失败，dir_path 参数类型不正确')
             return False
         if not os.path.isdir(dir_path):
@@ -70,7 +72,7 @@ class PublishHelper:
         :param include_list:
         :return:
         """
-        self._include = include_list
+        self._include = self.__specification_path(include_list)
 
     def set_exclude(self, exclude_list):
         """
@@ -78,7 +80,7 @@ class PublishHelper:
         :param exclude_list:
         :return:
         """
-        self._exclude = exclude_list
+        self._exclude = self.__specification_path(exclude_list)
 
     def del_include(self):
         """
@@ -144,13 +146,23 @@ class PublishHelper:
             abs_path.append(os.path.join(dir_path, file))
         return abs_path
 
+    def __specification_path(self, path):
+        if isinstance(path, str):
+            return os.path.normpath(path)
+        elif isinstance(path, list):
+            specification = []
+            for p in path:
+                specification.append(os.path.normpath(p))
+            return specification
+
 
 def main():
-    # exclude_list = ['.git', '__pycache__', '.idea', 'star.iml', 'ADBManager.py', '.gitignore']
-    include_list = ['*.py', '.gitignore', '__pycache__', '*.dll', 'tools\\sign']
-    exclude_list = ['__init__.py', '*.pyc']
+    # exclude_list = ['.git', '__pycache__', '.idea', 'star.iml', '.gitignore', '__init__.py']
+    include_list = ['*.py', '*.dll', '.git\\logs\\refs\\heads']
+    # exclude_list = ['*.py']
     dir_path = 'e:\\star'
-    ph = PublishHelper(include=include_list, exclude=exclude_list)
+    # dir_path = 'E:\\工作\\prefetch'
+    ph = PublishHelper(include=include_list)
     ph.pack_file(dir_path)
     return True
 
